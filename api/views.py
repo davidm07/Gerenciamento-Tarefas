@@ -1,17 +1,19 @@
 from typing import List
 from django.http import HttpResponse
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Task, User
+from .models import Task
 from . import serializers
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.pagination import PageNumberPagination
 from drf_yasg import openapi
 from django.db.models import Q
 from django.contrib.auth import authenticate
+
+
 
 # Create your views here.
 @swagger_auto_schema(
@@ -27,7 +29,7 @@ from django.contrib.auth import authenticate
     tags=['tasks']
 )
 @api_view(['GET', 'POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 
 def tasks(request):
     if request.method == 'GET':
@@ -54,7 +56,7 @@ def tasks(request):
     request_body=serializers.TaskSerializer,
 )
 @api_view(['GET', 'DELETE', 'PUT'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 
 def task_by_id(request, pk):
     try:
@@ -81,7 +83,7 @@ def task_by_id(request, pk):
     tags=['token'],
 )
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def register(request):
     serializer = serializers.UserSerializer(data=request.data)
     if serializer.is_valid():
@@ -95,26 +97,11 @@ def register(request):
     tags=['cadastro'],
 )
 @api_view(['POST'])
-@permission_classes([AllowAny])
+
+@permission_classes([IsAuthenticated])
 def cadastro(request):
     serializer = serializers.UserSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response({'username': serializer.data['username']}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['POST'])
-def login(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
-
-    # Verifica se o usuário e senha são válidos
-    user = authenticate(username=username, password=password)
-
-    if user is not None:
-        # Autenticação foi bem-sucedida
-        return Response({'message': 'Login bem-sucedido'}, status=status.HTTP_200_OK)
-    else:
-        # Falha na autenticação
-        return Response({'error': 'Usuário ou senha incorretos'}, status=status.HTTP_401_UNAUTHORIZED)
