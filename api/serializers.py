@@ -5,8 +5,13 @@ from django.contrib.auth.models import User
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = '__all__'
+        fields = ['titulo', 'completed']  
 
+    def create(self, validated_data):
+        validated_data['owner'] = self.context['request'].user
+        return super().create(validated_data)
+
+    
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

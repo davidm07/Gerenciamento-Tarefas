@@ -21,7 +21,9 @@ from django.contrib.auth import authenticate
     tags=['tasks'],
     manual_parameters=[
         openapi.Parameter('page', openapi.IN_QUERY, type=openapi.TYPE_NUMBER),
+        openapi.Parameter('completed', openapi.IN_QUERY, description='Tarefa concluída?', type=openapi.TYPE_BOOLEAN),
     ]
+    
 )
 @swagger_auto_schema(
     methods=['POST'],
@@ -33,16 +35,22 @@ from django.contrib.auth import authenticate
 
 def tasks(request):
     if request.method == 'GET':
-        tasks = Task.objects.all()
+        completed_param = request.query_params.get('completed', None)
+        tasks = Task.objects.filter(owner=request.user)
+        if completed_param is not None:
+            if completed_param.lower() == 'true':
+                tasks = tasks.filter(completed=True)
+            elif completed_param.lower() == 'false':
+                tasks = tasks.filter(completed=False)
         paginator = PageNumberPagination()
-        paginator.page_size = 1
+        paginator.page_size = 5
         result_page = paginator.paginate_queryset(tasks, request)
         serializer = serializers.TaskSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
     elif request.method == 'POST':
-        serializer = serializers.TaskSerializer(data=request.data)
+        serializer = serializers.TaskSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=request.user)  
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -60,7 +68,7 @@ def tasks(request):
 
 def task_by_id(request, pk):
     try:
-        task = Task.objects.get(pk=pk)
+        task = Task.objects.get(pk=pk, owner=request.user)
     except Task.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
