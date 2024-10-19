@@ -48,6 +48,7 @@ def tasks(request):
 )
 @api_view(['GET', 'DELETE', 'PUT'])
 @permission_classes([AllowAny])
+
 def task_by_id(request, pk):
     try:
         task = Task.objects.get(pk=pk)
@@ -66,3 +67,31 @@ def task_by_id(request, pk):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+@swagger_auto_schema(
+    methods=['POST'],
+    request_body=serializers.UserSerializer,
+    tags=['token'],
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register(request):
+    serializer = serializers.UserSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'username': serializer.data['username']}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(
+    methods=['POST'],
+    request_body=serializers.UserSerializer,
+    tags=['cadastro'],
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def cadastro(request):
+    serializer = serializers.UserSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'username': serializer.data['username']}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

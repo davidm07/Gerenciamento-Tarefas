@@ -9,7 +9,7 @@ class TaskSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = 'usuario', 'senha'
+        fields = 'username', 'password'
 
         def create(self, validated_data):
             user = User.objects.create_user(**validated_data)
