@@ -11,11 +11,15 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.pagination import PageNumberPagination
 from drf_yasg import openapi
 from django.db.models import Q
+from django.contrib.auth import authenticate
 
 # Create your views here.
 @swagger_auto_schema(
     methods=['GET'],
-    tags=['tasks']
+    tags=['tasks'],
+    manual_parameters=[
+        openapi.Parameter('page', openapi.IN_QUERY, type=openapi.TYPE_NUMBER),
+    ]
 )
 @swagger_auto_schema(
     methods=['POST'],
@@ -28,8 +32,11 @@ from django.db.models import Q
 def tasks(request):
     if request.method == 'GET':
         tasks = Task.objects.all()
-        serializer = serializers.TaskSerializer(tasks, many=True)
-        return Response(serializer.data)
+        paginator = PageNumberPagination()
+        paginator.page_size = 1
+        result_page = paginator.paginate_queryset(tasks, request)
+        serializer = serializers.TaskSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
     elif request.method == 'POST':
         serializer = serializers.TaskSerializer(data=request.data)
         if serializer.is_valid():
@@ -95,3 +102,19 @@ def cadastro(request):
         serializer.save()
         return Response({'username': serializer.data['username']}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def login(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    # Verifica se o usuário e senha são válidos
+    user = authenticate(username=username, password=password)
+
+    if user is not None:
+        # Autenticação foi bem-sucedida
+        return Response({'message': 'Login bem-sucedido'}, status=status.HTTP_200_OK)
+    else:
+        # Falha na autenticação
+        return Response({'error': 'Usuário ou senha incorretos'}, status=status.HTTP_401_UNAUTHORIZED)
