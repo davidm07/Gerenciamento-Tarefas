@@ -137,7 +137,7 @@ DB_PORT = config('DB_PORT', default=os.environ.get('DB_PORT', None))
 
 DATABASES = {
     'default': {
-        'ENGINE': DB_ENGINE,
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': DB_NAME,
         'USER': DB_USER,
         'PASSWORD': DB_PASSWORD,
