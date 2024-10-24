@@ -122,6 +122,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DB_URL = config('DB_URL', default=os.environ.get('DB_URL', None))
+DB_ENGINE = config('DB_ENGINE', default=os.environ.get('DB_ENGINE', None))
+DB_NAME = config('DB_NAME', default=os.environ.get('DB_NAME', None))
+DB_USER = config('DB_USER', default=os.environ.get('DB_USER', None))
+DB_PASSWORD = config('DB_PASSWORD', default=os.environ.get('DB_PASSWORD', None))
+DB_HOST = config('DB_HOST', default=os.environ.get('DB_HOST', None))
+DB_PORT = config('DB_PORT', default=os.environ.get('DB_PORT', None))
 
 # DATABASES = {
 #     'default': dj_database_url.config(
@@ -131,12 +137,12 @@ DB_URL = config('DB_URL', default=os.environ.get('DB_URL', None))
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres.vpmnfsxjdquljtzdumjd',
-        'PASSWORD': '@jprog2024@',
-        'HOST': 'aws-0-sa-east-1.pooler.supabase.com',
-        'PORT': '6543',
+        'ENGINE': DB_ENGINE,
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     }
 }
 
