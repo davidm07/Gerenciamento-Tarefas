@@ -123,10 +123,21 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DB_URL = config('DB_URL', default=os.environ.get('DB_URL', None))
 
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default=DB_URL
+#     )
+# }
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default=DB_URL
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres.vpmnfsxjdquljtzdumjd',
+        'PASSWORD': 'jprog2024',
+        'HOST': 'aws-0-sa-east-1.pooler.supabase.com',
+        'PORT': '6543',
+    }
 }
 
 # Password validation
